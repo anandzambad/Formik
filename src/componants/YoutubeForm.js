@@ -1,5 +1,5 @@
-import React from 'react'
-import { Formik, Form, Field, ErrorMessage,FieldArray } from 'formik'
+import React,{useState} from 'react'
+import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik'
 import * as Yup from 'yup'
 import TextError from './TextError'
 
@@ -12,9 +12,23 @@ const initialValues = {
         facebook: '',
         twitter: ''
     },
-    phoneNumber: ['',''],
+    phoneNumber: ['', ''],
     phNumbers: ['']
 
+}
+
+const savedValues = {
+    name: 'anand',
+    email: 'anand@gmail.com',
+    channel: 'Anand Hub',
+    comments: 'welcome to Anand Hub',
+    address: 'Yashwin Socity',
+    social: {
+        facebook: '',
+        twitter: ''
+    },
+    phoneNumber: ['', ''],
+    phNumbers: ['']
 }
 const onSubmit = values => {
     console.log('Form data', values)
@@ -24,20 +38,30 @@ const onSubmit = values => {
 const validationSchema = Yup.object({
     name: Yup.string().required('Required!'),
     email: Yup.string().email('Invalid email format').required('Required!'),
-    channel: Yup.string().required('Required!')
+    channel: Yup.string().required('Required!'),
+    comments: Yup.string().required('Required!')
 })
+
+const validateComments = value => {
+    let error
+    if (!value) {
+        error = 'Required!'
+    }
+    return error
+}
 
 
 export const YoutubeForm = () => {
 
-
+const [formValues, setFormvalues] = useState(null)
     //console.log('Visited fieled', formik.touched)
 
     return (
         <Formik
-            initialValues={initialValues}
+            initialValues={formValues || initialValues}
             validationSchema={validationSchema}
             onSubmit={onSubmit}
+            enableReinitialize
         >
             <Form>
                 <div className='form-control'><label htmlFor='name'>Name</label>
@@ -55,7 +79,8 @@ export const YoutubeForm = () => {
                     <ErrorMessage name='channel' />
                 </div>
                 <div className='form-control'> <label htmlFor='channel'>Comments</label>
-                    <Field type='text' as='textarea' id='comments' name='comments' />
+                    <Field type='text' as='textarea' id='comments' name='comments' validate={validateComments} />
+                    <ErrorMessage name='comments' component={TextError} />
                 </div>
                 <div className='form-control'><label htmlFor='facebook profile'>facebook</label>
                     <Field type='text' id='facebook' name='social.facebook' />
@@ -72,38 +97,39 @@ export const YoutubeForm = () => {
 
                 </div>
                 <div className='form-control'><label>List of phone number</label>
-                <FieldArray name='phNumbers'>
-                    {fildArrayProps =>{
-                        console.log('filedArrayProps',fildArrayProps)
-                        const { push, remove, form }= fildArrayProps
-                        const { values }= form
-                        const { phNumbers }=values
-                        return(
-                            <div>
-                                { phNumbers.map((phNumber, index) => (
+                    <FieldArray name='phNumbers'>
+                        {fildArrayProps => {
+                            console.log('filedArrayProps', fildArrayProps)
+                            const { push, remove, form } = fildArrayProps
+                            const { values } = form
+                            const { phNumbers } = values
+                            return (
+                                <div>
+                                    {phNumbers.map((phNumber, index) => (
                                         <div key={index}>
                                             <Field name={`phNumber[${index}]`} />
-                                            {index >0 && (
-                                                <button type='button' onClick={( )=> remove(index)}>
+                                            {index > 0 && (
+                                                <button type='button' onClick={() => remove(index)}>
                                                     {' '}
                                                     -{' '}
                                                 </button>
                                             )}
-                                            <button type='button' onClick={()=>push('')}>
+                                            <button type='button' onClick={() => push('')}>
                                                 {' '}
                                                 +{' '}
                                             </button>
-                                            </div>
+                                        </div>
                                     ))
-                                }
-                            </div>
-                        )
-                    }}
+                                    }
+                                </div>
+                            )
+                        }}
 
-                </FieldArray>
+                    </FieldArray>
 
                 </div>
-
+                <button type='button' onClick={()=>setFormvalues(savedValues)}>Load Saved data</button>
+                <button type='reset'>Reset</button>
                 <button type='submit'>Submit</button>
             </Form>
         </Formik>
